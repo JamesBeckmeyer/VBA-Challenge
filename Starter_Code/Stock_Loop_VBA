@@ -1,0 +1,88 @@
+Sub TickerLoop()
+    
+    Dim i As Integer
+    Dim j As Integer
+    Dim x As Integer
+    Dim vol As Double
+    Dim s_open As Double
+    Dim s_close As Double
+    
+    For Each ws In Worksheets
+        
+        'Set the headers
+        ws.Cells(1, 9).Value = ("Ticker")
+        ws.Cells(1, 10).Value = ("Yearly Change")
+        ws.Cells(1, 11).Value = ("Percent Change")
+        ws.Cells(1, 12).Value = ("Total Stock Volume")
+        ws.Cells(1, 13).Value = ("Year Open")
+        ws.Cells(1, 14).Value = ("Year Close")
+        ws.Cells(1, 18).Value = ("Ticker")
+        ws.Cells(1, 19).Value = ("Value")
+        ws.Cells(2, 17).Value = ("Greatest % Increase")
+        ws.Cells(3, 17).Value = ("Greaest % Decrease")
+        ws.Cells(4, 17).Value = ("Greatest Total Volume")
+        
+        'Locate last row for loop for yearly calculations
+        LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        Ticker = 1
+        j = 1
+        vol = 0
+        
+        'For loop for yearly calculations
+        For i = 2 To LastRow
+            If Ticker = 1 Then
+                Ticker = ws.Cells(i, 1).Value
+                vol = ws.Cells(i, 7).Value
+                s_open = ws.Cells(i, 3)
+                
+            ElseIf ws.Cells(i, 1).Value = Ticker Then
+                vol = vol + ws.Cells(i, 7).Value
+            
+            Else
+                j = j + 1
+                s_close = ws.Cells(i - 1, 6).Value
+                ws.Cells(j, 9).Value = Ticker
+                ws.Cells(j, 12).Value = vol
+                ws.Cells(j, 10).Value = s_close - s_open
+                
+                If ws.Cells(j, 10).Value > 0 Then
+                    ws.Cells(j, 10).Interior.ColorIndex = 4
+                Else
+                    ws.Cells(j, 10).Interior.ColorIndex = 3
+                End If
+                
+                ws.Cells(j, 13).Value = s_open
+                ws.Cells(j, 14).Value = s_close
+                ws.Cells(j, 11).Value = Format(-(1 - (s_close / s_open)), "#.##%")
+                vol = ws.Cells(i, 7).Value
+                s_open = ws.Cells(i, 3).Value
+                
+            End If
+            
+            Ticker = ws.Cells(i, 1).Value
+        Next i
+        ws.Cells(j, 9).Value = Ticker
+        
+        Dim mx_vol As Double
+        Dim mx_inc As Double
+        Dim mx_dec As Double
+        
+        'Last row for greatest calculations
+        LastRow = ws.Cells(Rows.Count, 9).End(xlUp).Row
+        
+        'Worksheet functions for greatest calculations
+        mx_vol = WorksheetFunction.Max(Range("L" & 2 & ":" & "L" & LastRow))
+        mx_inc = WorksheetFunction.Max(Range("K" & 2 & ":" & "K" & LastRow))
+        mx_dec = WorksheetFunction.Min(Range("K" & 2 & ":" & "K" & LastRow))
+        
+        ws.Cells(4, 19).Value = mx_vol
+        ws.Cells(3, 19).Value = Format(mx_dec, "#.##%")
+        ws.Cells(2, 19).Value = Format(mx_inc, "#.##%")
+        
+        
+    Next ws
+    
+    
+End Sub
+    
+    
